@@ -1,0 +1,40 @@
+name: Build ReaperEngine APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK (split per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReaperEngine-APKs
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 30
